@@ -1,10 +1,13 @@
 const express = require("express");
 
+const ansControllers = require("../controllers/answers-controllers");
+
 const router = express.Router();
 
-router.get("/", (req, res, next) => {
-  console.log("GET");
-  res.send("ANSWERS");
-});
+router.get("/qns/:qid", ansControllers.getQuestionAns);
+
+router.post("/new", ansControllers.postAnswer);
+
+router.patch("/:aid", ansControllers.updateAnswer);
 
 module.exports = router;

@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
+const HttpError = require("./models/http-error");
+
 const usersRoutes = require("./routes/users-routes");
 const questionsRoutes = require("./routes/questions-routes");
 const answersRoutes = require("./routes/answers-routes");
