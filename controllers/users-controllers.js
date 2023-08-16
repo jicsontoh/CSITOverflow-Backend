@@ -1,9 +1,12 @@
 const HttpError = require("../models/http-error");
 
+const moment = require("moment");
+
 const users = [
   {
     id: "userid1",
     username: "username",
+    password: "password",
     gravatar: "m",
     answer_count: 10,
     comment_count: 20,
@@ -14,6 +17,7 @@ const users = [
   {
     id: "userid3",
     username: "username3",
+    password: "password",
     gravatar: "f",
     answer_count: 10,
     comment_count: 20,
@@ -24,6 +28,7 @@ const users = [
   {
     id: "userid2",
     username: "username2",
+    password: "password",
     gravatar: "m2",
     answer_count: 5,
     comment_count: 10,
@@ -34,6 +39,7 @@ const users = [
   {
     id: "userid4",
     username: "username4",
+    password: "password",
     gravatar: "f2",
     answer_count: 7,
     comment_count: 11,
@@ -44,6 +50,7 @@ const users = [
   {
     id: "userid5",
     username: "username5",
+    password: "password",
     gravatar: "m3",
     answer_count: 8,
     comment_count: 1,
@@ -72,5 +79,35 @@ const getSpecificUser = (req, res, next) => {
   res.json({ user });
 };
 
+const login = (req, res, next) => {
+  const { username, password } = req.body;
+};
+
+const signup = (req, res, next) => {
+  const { username, password, reenterpwd } = req.body;
+
+  if (password !== reenterpwd) {
+    const error = new HttpError("Password does not match", 404);
+    return next(error);
+  }
+
+  const createdUser = {
+    id: "userid6",
+    username: username,
+    password: password,
+    gravatar: "m3",
+    answer_count: 8,
+    comment_count: 1,
+    post_count: 5,
+    votes: 20,
+    created_at: moment(),
+  };
+
+  users.push(createdUser);
+  res.status(201).json({ user: createdUser });
+};
+
 exports.getUsers = getUsers;
 exports.getSpecificUser = getSpecificUser;
+exports.login = login;
+exports.signup = signup;
