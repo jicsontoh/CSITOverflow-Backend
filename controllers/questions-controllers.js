@@ -1,6 +1,7 @@
 const HttpError = require("../models/http-error");
 
 const moment = require("moment");
+const Question = require("../models/question");
 
 const questions = [
   {
@@ -66,11 +67,10 @@ const getSpecificQns = (req, res, next) => {
   res.json({ qns });
 };
 
-const postQuestion = (req, res, next) => {
+const postQuestion = async (req, res, next) => {
   const { title, tags, question } = req.body;
 
-  const createdQns = {
-    id: 7,
+  const createdQns = new Question({
     title: title,
     body: question,
     username: "username2",
@@ -82,9 +82,14 @@ const postQuestion = (req, res, next) => {
     votes: 15,
     created_at: moment(),
     tags: "tags",
-  };
+  });
 
-  questions.push(createdQns);
+  try {
+    await createdQns.save();
+  } catch (err) {
+    const error = new HttpError("Posting Question failed", 500);
+    return next(error);
+  }
 
   res.status(201).json({ createdQns });
 };

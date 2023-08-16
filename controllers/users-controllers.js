@@ -1,6 +1,7 @@
 const HttpError = require("../models/http-error");
 
 const moment = require("moment");
+const User = require("../models/user");
 
 const users = [
   {
@@ -83,7 +84,7 @@ const login = (req, res, next) => {
   const { username, password } = req.body;
 };
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const { username, password, reenterpwd } = req.body;
 
   if (password !== reenterpwd) {
@@ -91,19 +92,19 @@ const signup = (req, res, next) => {
     return next(error);
   }
 
-  const createdUser = {
-    id: "userid6",
+  const createdUser = new User({
     username: username,
     password: password,
-    gravatar: "m3",
-    answer_count: 8,
-    comment_count: 1,
-    post_count: 5,
-    votes: 20,
     created_at: moment(),
-  };
+  });
 
-  users.push(createdUser);
+  try {
+    await createdUser.save();
+  } catch (err) {
+    const error = new HttpError("Signing up failed", 500);
+    return next(error);
+  }
+
   res.status(201).json({ user: createdUser });
 };
 

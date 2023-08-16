@@ -11,9 +11,7 @@ const userSchema = new Schema({
   post_count: { type: Number },
   votes: { type: Number },
   created_at: { type: String },
-  questions: [
-    { type: mongoose.Types.ObjectId, required: true, ref: "Question" },
-  ],
+  questions: [{ type: mongoose.Types.ObjectId, ref: "Question" }],
 });
 
 module.exports = mongoose.model("User", userSchema);

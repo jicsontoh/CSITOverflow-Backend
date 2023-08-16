@@ -1,6 +1,7 @@
 const HttpError = require("../models/http-error");
 
 const moment = require("moment");
+const Answer = require("../models/answer");
 
 const answers = [
   {
@@ -47,20 +48,24 @@ const getQuestionAns = (req, res, next) => {
   res.json({ ans });
 };
 
-const postAnswer = (req, res, next) => {
+const postAnswer = async (req, res, next) => {
   const { answer, userId, qnsId } = req.body;
 
-  const createdAns = {
-    id: "3",
+  const createdAns = new Answer({
     body: answer,
-    user_id: "userid3",
-    qns_id: "3",
+    user_id: userId,
+    qns_id: qnsId,
     up_votes: 5,
     down_votes: 1,
     created_at: moment(),
-  };
+  });
 
-  answers.push(createdAns);
+  try {
+    await createdAns.save();
+  } catch (err) {
+    const error = new HttpError("Posting Answer failed", 500);
+    return next(error);
+  }
 
   res.status(201).json({ createdAns });
 };

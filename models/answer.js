@@ -6,6 +6,7 @@ const answerSchema = new Schema({
   body: { type: String, required: true },
   username: { type: String },
   user_id: { type: String },
+  qns_id: { type: String },
   gravatar: { type: String },
   up_votes: { type: Number },
   down_votes: { type: Number },
