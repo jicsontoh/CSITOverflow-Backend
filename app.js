@@ -15,6 +15,11 @@ app.use("/api/questions", questionsRoutes);
 
 app.use("/api/answers", answersRoutes);
 
+app.use((req, res, next) => {
+  const error = new HttpError("Could not find such path", 404);
+  next(error);
+});
+
 app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
