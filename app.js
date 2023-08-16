@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
 const HttpError = require("./models/http-error");
 
@@ -8,6 +10,7 @@ const questionsRoutes = require("./routes/questions-routes");
 const answersRoutes = require("./routes/answers-routes");
 
 const app = express();
+dotenv.config();
 
 app.use(bodyParser.json());
 
@@ -31,4 +34,11 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "Unknown error occurred" });
 });
 
-app.listen(8080);
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    app.listen(5000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
