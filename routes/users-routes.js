@@ -1,5 +1,7 @@
 const express = require("express");
 
+const HttpError = require("../models/http-error");
+
 const router = express.Router();
 
 const users = [
@@ -56,7 +58,6 @@ const users = [
 ];
 
 router.get("/", (req, res, next) => {
-  console.log("GET");
   res.json({ users });
 });
 
@@ -67,7 +68,11 @@ router.get("/:uid", (req, res, next) => {
     return u.id === userId;
   });
 
-  console.log("GET");
+  if (!user) {
+    const error = new HttpError("Cannot find such user", 404);
+    return next(error);
+  }
+
   res.json({ user });
 });
 

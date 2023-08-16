@@ -15,4 +15,13 @@ app.use("/api/questions", questionsRoutes);
 
 app.use("/api/answers", answersRoutes);
 
+app.use((error, req, res, next) => {
+  if (res.headerSent) {
+    return next(error);
+  }
+
+  res.status(error.code || 500);
+  res.json({ message: error.message || "Unknown error occurred" });
+});
+
 app.listen(8080);
