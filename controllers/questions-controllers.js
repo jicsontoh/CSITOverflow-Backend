@@ -1,70 +1,42 @@
 const HttpError = require("../models/http-error");
+const { validationResult } = require("express-validator");
 
 const moment = require("moment");
 const Question = require("../models/question");
 
-const questions = [
-  {
-    id: "1",
-    title: "qns title",
-    body: "question body",
-    username: "username",
-    gravatar: "image",
-    user_id: "userid1",
-    answer_count: 10,
-    comment_count: 20,
-    views: 27,
-    votes: 10,
-    created_at: "2023/08/14, 13:00",
-    tags: "tags",
-  },
-  {
-    id: "2",
-    title: "qns title2",
-    body: "question body222",
-    username: "username",
-    gravatar: "image",
-    user_id: "userid1",
-    answer_count: 10,
-    comment_count: 20,
-    views: 30,
-    votes: 11,
-    created_at: "2023/07/14, 13:00",
-    tags: "tags",
-  },
-  {
-    id: "3",
-    title: "qns title3",
-    body: "question body333",
-    username: "username2",
-    gravatar: "image",
-    user_id: "userid2",
-    answer_count: 5,
-    comment_count: 10,
-    views: 24,
-    votes: 15,
-    created_at: "2023/06/14, 13:00",
-    tags: "tags",
-  },
-];
-
-const getQuestions = (req, res, next) => {
-  res.json({ questions });
+const getQuestions = async (req, res, next) => {
+  let questions;
+  try {
+    questions = await Question.find();
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching questions failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+  res.json({
+    questions: questions.map((qns) => qns.toObject({ getters: true })),
+  });
 };
 
-const getSpecificQns = (req, res, next) => {
+const getSpecificQns = async (req, res, next) => {
   const qnsId = req.params.qid;
 
-  const qns = questions.find((q) => {
-    return q.id === qnsId;
-  });
+  let qns;
+  try {
+    qns = await Question.findById(qnsId);
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find question", 500);
+    return next(error);
+  }
 
   if (!qns) {
     const error = new HttpError("Cannot find such question", 404);
     return next(error);
   }
 
-  res.json({ qns });
+  res.json({ qns: qns.toObject({ getters: true }) });
 };
 
 const postQuestion = async (req, res, next) => {
@@ -94,9 +66,80 @@ const postQuestion = async (req, res, next) => {
   res.status(201).json({ createdQns });
 };
 
-const updateQuestion = (req, res, next) => {};
+const updateQuestion = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(
+      new HttpError("Invalid inputs passed, please check your data.", 422)
+    );
+  }
+
+  const { title, body } = req.body;
+  const qnsId = req.params.qid;
+
+  let qns;
+  try {
+    qns = await Question.findById(qnsId);
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find question", 500);
+    return next(error);
+  }
+
+  qns.title = title;
+  qns.body = body;
+
+  try {
+    await qns.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update question.",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ qns: qns.toObject({ getters: true }) });
+};
+
+const deleteQuestion = async (req, res, next) => {
+  const qnsId = req.params.qid;
+
+  let qns;
+  try {
+    qns = await Question.findById(qnsId);
+  } catch (err) {
+    const error = new HttpError(
+      "Server error, could not delete question.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!qns) {
+    const error = new HttpError("Could not find question", 404);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await qns.remove({ session: sess });
+    // qns.user_id.places.pull(place);
+    // await place.creator.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete question.",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ message: "Deleted question." });
+};
 
 exports.getQuestions = getQuestions;
 exports.getSpecificQns = getSpecificQns;
 exports.postQuestion = postQuestion;
 exports.updateQuestion = updateQuestion;
+exports.deleteQuestion = deleteQuestion;

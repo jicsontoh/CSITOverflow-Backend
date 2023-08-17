@@ -12,4 +12,6 @@ router.post("/new", qnsController.postQuestion);
 
 router.patch("/:qid", qnsController.updateQuestion);
 
+router.delete("/:qid", qnsController.deleteQuestion);
+
 module.exports = router;
