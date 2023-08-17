@@ -10,4 +10,6 @@ router.post("/new", ansControllers.postAnswer);
 
 router.patch("/:aid", ansControllers.updateAnswer);
 
+router.delete("/:aid", ansControllers.deleteAnswer);
+
 module.exports = router;
