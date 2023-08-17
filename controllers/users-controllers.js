@@ -3,85 +3,59 @@ const HttpError = require("../models/http-error");
 const moment = require("moment");
 const User = require("../models/user");
 
-const users = [
-  {
-    id: "userid1",
-    username: "username",
-    password: "password",
-    gravatar: "m",
-    answer_count: 10,
-    comment_count: 20,
-    post_count: 4,
-    votes: 10,
-    created_at: "2023/08/14, 13:00",
-  },
-  {
-    id: "userid3",
-    username: "username3",
-    password: "password",
-    gravatar: "f",
-    answer_count: 10,
-    comment_count: 20,
-    post_count: 6,
-    votes: 11,
-    created_at: "2023/07/14, 13:00",
-  },
-  {
-    id: "userid2",
-    username: "username2",
-    password: "password",
-    gravatar: "m2",
-    answer_count: 5,
-    comment_count: 10,
-    post_count: 2,
-    votes: 15,
-    created_at: "2023/06/14, 13:00",
-  },
-  {
-    id: "userid4",
-    username: "username4",
-    password: "password",
-    gravatar: "f2",
-    answer_count: 7,
-    comment_count: 11,
-    post_count: 2,
-    votes: 20,
-    created_at: "2023/06/14, 13:00",
-  },
-  {
-    id: "userid5",
-    username: "username5",
-    password: "password",
-    gravatar: "m3",
-    answer_count: 8,
-    comment_count: 1,
-    post_count: 5,
-    votes: 20,
-    created_at: "2023/06/14, 13:00",
-  },
-];
-
-const getUsers = (req, res, next) => {
-  res.json({ users });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching users failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
-const getSpecificUser = (req, res, next) => {
+const getSpecificUser = async (req, res, next) => {
   const userId = req.params.uid;
 
-  const user = users.find((u) => {
-    return u.id === userId;
-  });
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find user", 500);
+    return next(error);
+  }
 
   if (!user) {
     const error = new HttpError("Cannot find such user", 404);
     return next(error);
   }
 
-  res.json({ user });
+  res.json({ user: user.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { username, password } = req.body;
+
+  let user;
+  try {
+    user = await User.find({ username: username });
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find user", 500);
+    return next(error);
+  }
+
+  if (!user || user.password !== password) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      401
+    );
+    return next(error);
+  }
+
+  res.json({ message: "Logged in!" });
 };
 
 const signup = async (req, res, next) => {
