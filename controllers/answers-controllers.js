@@ -4,6 +4,8 @@ const { validationResult } = require("express-validator");
 const moment = require("moment");
 const Answer = require("../models/answer");
 const Question = require("../models/question");
+const User = require("../models/user");
+const question = require("../models/question");
 
 const getAnswerByQns = async (req, res, next) => {
   const qnsId = req.params.qid;
@@ -29,19 +31,52 @@ const getAnswerByQns = async (req, res, next) => {
 };
 
 const postAnswer = async (req, res, next) => {
-  const { answer, userId, qnsId } = req.body;
+  const { answer, user_id, qns_id } = req.body;
 
   const createdAns = new Answer({
     body: answer,
-    user_id: userId,
-    qns_id: qnsId,
+    user_id: user_id,
+    qns_id: qns_id,
     up_votes: 0,
     down_votes: 0,
     created_at: moment(),
   });
 
+  let user;
   try {
-    await createdAns.save();
+    user = await User.findById(user_id);
+  } catch (err) {
+    const error = new HttpError("Posting Answer failed, user id error", 500);
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("Posting Answer failed, no such user", 404);
+    return next(error);
+  }
+
+  let qnswer;
+  try {
+    qnswer = await Question.findById(qns_id);
+  } catch (err) {
+    const error = new HttpError("Posting Answer failed, qns id error", 500);
+    return next(error);
+  }
+
+  if (!qnswer) {
+    const error = new HttpError("Posting Answer failed, no such question", 404);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdAns.save({ session: sess });
+    user.answers.push(createdAns);
+    question.answers.push(createdAns);
+    await user.save({ session: sess });
+    await question.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError("Posting Answer failed", 500);
     return next(error);
@@ -104,8 +139,10 @@ const deleteAnswer = async (req, res, next) => {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await ans.remove({ session: sess });
-    // qns.user_id.places.pull(place);
-    // await place.creator.save({ session: sess });
+    ans.user_id.answers.pull(ans);
+    ans.qns_id.answers.pull(ans);
+    await ans.user_id.save({ session: sess });
+    await ans.qns_id.save({ session: sess });
     await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(

@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 
 const moment = require("moment");
 const Question = require("../models/question");
+const User = require("../models/user");
 
 const getQuestions = async (req, res, next) => {
   let questions;
@@ -54,8 +55,26 @@ const postQuestion = async (req, res, next) => {
     down_votes: 0,
   });
 
+  let user;
   try {
-    await createdQns.save();
+    user = await User.findById(user_id);
+  } catch (err) {
+    const error = new HttpError("Posting Question failed, user id error", 500);
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("Posting Question failed, no such user", 404);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdQns.save({ session: sess });
+    user.questions.push(createdQns);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError("Posting Question failed", 500);
     return next(error);
@@ -122,8 +141,8 @@ const deleteQuestion = async (req, res, next) => {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await qns.remove({ session: sess });
-    // qns.user_id.places.pull(place);
-    // await place.creator.save({ session: sess });
+    qns.user_id.questions.pull(qns);
+    await qns.user_id.save({ session: sess });
     await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
