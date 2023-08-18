@@ -15,6 +15,7 @@ const getQuestions = async (req, res, next) => {
     );
     return next(error);
   }
+
   res.json({
     questions: questions.map((qns) => qns.toObject({ getters: true })),
   });
@@ -40,20 +41,17 @@ const getSpecificQns = async (req, res, next) => {
 };
 
 const postQuestion = async (req, res, next) => {
-  const { title, tags, question } = req.body;
+  const { title, tags, question, user_id } = req.body;
 
   const createdQns = new Question({
     title: title,
     body: question,
-    username: "username2",
-    gravatar: "image",
-    user_id: "userid2",
-    answer_count: 5,
-    comment_count: 10,
-    views: 24,
-    votes: 15,
+    tags: tags,
+    user_id: user_id,
     created_at: moment(),
-    tags: "tags",
+    answers: [],
+    up_votes: 0,
+    down_votes: 0,
   });
 
   try {

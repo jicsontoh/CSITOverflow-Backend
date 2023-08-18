@@ -3,13 +3,14 @@ const { validationResult } = require("express-validator");
 
 const moment = require("moment");
 const Answer = require("../models/answer");
+const Question = require("../models/question");
 
-const getQuestionAns = async (req, res, next) => {
+const getAnswerByQns = async (req, res, next) => {
   const qnsId = req.params.qid;
 
-  let answers;
+  let qns_ans;
   try {
-    answers = await Answer.find({ qns_id: qnsId });
+    qns_ans = await Question.findById(qnsId).populate("answers");
   } catch (err) {
     const error = new HttpError(
       "Fetching answers failed, please try again later",
@@ -18,14 +19,12 @@ const getQuestionAns = async (req, res, next) => {
     return next(error);
   }
 
-  if (!answers || answers.places.length === 0) {
-    return next(
-      new HttpError("Could not find answers for the provided qns_id.", 404)
-    );
+  if (!qns_ans || qns_ans.answers.length === 0) {
+    return next(new HttpError("Could not find answers", 404));
   }
 
   res.json({
-    answers: answers.map((ans) => ans.toObject({ getters: true })),
+    ans: qns_ans.answers.map((ans) => ans.toObject({ getters: true })),
   });
 };
 
@@ -36,8 +35,8 @@ const postAnswer = async (req, res, next) => {
     body: answer,
     user_id: userId,
     qns_id: qnsId,
-    up_votes: 5,
-    down_votes: 1,
+    up_votes: 0,
+    down_votes: 0,
     created_at: moment(),
   });
 
@@ -119,7 +118,7 @@ const deleteAnswer = async (req, res, next) => {
   res.status(200).json({ message: "Deleted answer." });
 };
 
-exports.getQuestionAns = getQuestionAns;
+exports.getAnswerByQns = getAnswerByQns;
 exports.postAnswer = postAnswer;
 exports.updateAnswer = updateAnswer;
 exports.deleteAnswer = deleteAnswer;

@@ -4,7 +4,7 @@ const ansControllers = require("../controllers/answers-controllers");
 
 const router = express.Router();
 
-router.get("/qns/:qid", ansControllers.getQuestionAns);
+router.get("/:qid", ansControllers.getAnswerByQns);
 
 router.post("/new", ansControllers.postAnswer);
 

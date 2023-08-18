@@ -70,6 +70,10 @@ const signup = async (req, res, next) => {
     username: username,
     password: password,
     created_at: moment(),
+    gravatar: "avatar_img",
+    votes: 0,
+    questions: [],
+    answers: [],
   });
 
   try {
