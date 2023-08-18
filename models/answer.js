@@ -4,10 +4,8 @@ const Schema = mongoose.Schema;
 
 const answerSchema = new Schema({
   body: { type: String, required: true },
-  username: { type: String },
-  user_id: { type: String },
-  qns_id: { type: String },
-  gravatar: { type: String },
+  user_id: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
+  qns_id: { type: mongoose.Types.ObjectId, required: true, ref: "Question" },
   up_votes: { type: Number },
   down_votes: { type: Number },
   created_at: { type: String },
