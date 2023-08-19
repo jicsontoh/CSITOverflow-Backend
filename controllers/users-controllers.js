@@ -41,7 +41,7 @@ const login = async (req, res, next) => {
 
   let user;
   try {
-    user = await User.find({ username: username });
+    user = await User.findOne({ username: username });
   } catch (err) {
     const error = new HttpError("Server error, cannot find user", 500);
     return next(error);

@@ -1,7 +1,8 @@
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
-
+const mongoose = require("mongoose");
 const moment = require("moment");
+
 const Question = require("../models/question");
 const User = require("../models/user");
 
@@ -123,7 +124,7 @@ const deleteQuestion = async (req, res, next) => {
 
   let qns;
   try {
-    qns = await Question.findById(qnsId);
+    qns = await Question.findById(qnsId).populate("user_id");
   } catch (err) {
     const error = new HttpError(
       "Server error, could not delete question.",
@@ -140,7 +141,7 @@ const deleteQuestion = async (req, res, next) => {
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
-    await qns.remove({ session: sess });
+    await qns.deleteOne({ session: sess });
     qns.user_id.questions.pull(qns);
     await qns.user_id.save({ session: sess });
     await sess.commitTransaction();

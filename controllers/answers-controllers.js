@@ -1,11 +1,11 @@
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
-
+const mongoose = require("mongoose");
 const moment = require("moment");
+
 const Answer = require("../models/answer");
 const Question = require("../models/question");
 const User = require("../models/user");
-const question = require("../models/question");
 
 const getAnswerByQns = async (req, res, next) => {
   const qnsId = req.params.qid;
@@ -55,15 +55,15 @@ const postAnswer = async (req, res, next) => {
     return next(error);
   }
 
-  let qnswer;
+  let question;
   try {
-    qnswer = await Question.findById(qns_id);
+    question = await Question.findById(qns_id);
   } catch (err) {
     const error = new HttpError("Posting Answer failed, qns id error", 500);
     return next(error);
   }
 
-  if (!qnswer) {
+  if (!question) {
     const error = new HttpError("Posting Answer failed, no such question", 404);
     return next(error);
   }
@@ -124,7 +124,7 @@ const deleteAnswer = async (req, res, next) => {
 
   let ans;
   try {
-    ans = await Answer.findById(ansId);
+    ans = await Answer.findById(ansId).populate("user_id").populate("qns_id");
   } catch (err) {
     const error = new HttpError("Server error, cannot find answer", 500);
     return next(error);
@@ -138,7 +138,7 @@ const deleteAnswer = async (req, res, next) => {
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
-    await ans.remove({ session: sess });
+    await ans.deleteOne({ session: sess });
     ans.user_id.answers.pull(ans);
     ans.qns_id.answers.pull(ans);
     await ans.user_id.save({ session: sess });
