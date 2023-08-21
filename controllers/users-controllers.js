@@ -55,7 +55,7 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ message: "Logged in!" });
+  res.status(201).json({ user: user.toObject({ getters: true }) });
 };
 
 const signup = async (req, res, next) => {
@@ -79,11 +79,12 @@ const signup = async (req, res, next) => {
   try {
     await createdUser.save();
   } catch (err) {
+    console.log(err);
     const error = new HttpError("Signing up failed", 500);
     return next(error);
   }
 
-  res.status(201).json({ user: createdUser });
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
 exports.getUsers = getUsers;
