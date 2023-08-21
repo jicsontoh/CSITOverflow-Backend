@@ -33,7 +33,7 @@ const getSpecificUser = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ user: user.toObject({ getters: true }) });
+  res.status(201).json({ user: user.toObject({ getters: true }) });
 };
 
 const login = async (req, res, next) => {
