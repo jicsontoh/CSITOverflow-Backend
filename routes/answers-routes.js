@@ -12,4 +12,6 @@ router.patch("/:aid", ansControllers.updateAnswer);
 
 router.delete("/:aid", ansControllers.deleteAnswer);
 
+router.patch("/vote/:aid", ansControllers.voteAnswer);
+
 module.exports = router;

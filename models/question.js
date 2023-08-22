@@ -8,8 +8,8 @@ const questionSchema = new Schema({
   tags: { type: String },
   user_id: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
   answers: [{ type: mongoose.Types.ObjectId, ref: "Answer" }],
-  up_votes: { type: Number },
-  down_votes: { type: Number },
+  up_votes: [{ type: mongoose.Types.ObjectId, ref: "User" }],
+  down_votes: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   created_at: { type: String },
 });
 

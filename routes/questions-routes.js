@@ -14,4 +14,6 @@ router.patch("/:qid", qnsController.updateQuestion);
 
 router.delete("/:qid", qnsController.deleteQuestion);
 
+router.patch("/vote/:qid", qnsController.voteQuestion);
+
 module.exports = router;

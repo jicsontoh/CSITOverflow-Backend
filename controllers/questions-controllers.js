@@ -52,8 +52,8 @@ const postQuestion = async (req, res, next) => {
     user_id: user_id,
     created_at: moment(),
     answers: [],
-    up_votes: 0,
-    down_votes: 0,
+    up_votes: [],
+    down_votes: [],
   });
 
   let user;
@@ -92,7 +92,7 @@ const updateQuestion = async (req, res, next) => {
     );
   }
 
-  const { title, body } = req.body;
+  const { title, body, up_votes, down_votes } = req.body;
   const qnsId = req.params.qid;
 
   let qns;
@@ -156,8 +156,50 @@ const deleteQuestion = async (req, res, next) => {
   res.status(200).json({ message: "Deleted question." });
 };
 
+const voteQuestion = async (req, res, next) => {
+  const { up_id, down_id } = req.body;
+  const qnsId = req.params.qid;
+
+  let qns;
+  try {
+    qns = await Question.findById(qnsId);
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find question", 500);
+    return next(error);
+  }
+
+  if (up_id) {
+    if (!qns.up_votes.includes(up_id)) {
+      qns.up_votes.push(up_id);
+    } else {
+      qns.up_votes.pull(up_id);
+    }
+  }
+
+  if (down_id) {
+    if (!qns.down_votes.includes(down_id)) {
+      qns.down_votes.push(down_id);
+    } else {
+      qns.down_votes.pull(down_id);
+    }
+  }
+
+  try {
+    await qns.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update question.",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ qns: qns.toObject({ getters: true }) });
+};
+
 exports.getQuestions = getQuestions;
 exports.getSpecificQns = getSpecificQns;
 exports.postQuestion = postQuestion;
 exports.updateQuestion = updateQuestion;
 exports.deleteQuestion = deleteQuestion;
+exports.voteQuestion = voteQuestion;

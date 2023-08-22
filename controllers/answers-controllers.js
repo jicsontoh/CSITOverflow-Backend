@@ -22,10 +22,11 @@ const getAnswerByQns = async (req, res, next) => {
   }
 
   if (!qns_ans || qns_ans.answers.length === 0) {
-    return next(new HttpError("Could not find answers", 404));
+    return res.status(201).json({ ans: {} });
+    // return next(new HttpError("Could not find answers", 404));
   }
 
-  res.json({
+  res.status(201).json({
     ans: qns_ans.answers.map((ans) => ans.toObject({ getters: true })),
   });
 };
@@ -37,8 +38,8 @@ const postAnswer = async (req, res, next) => {
     body: answer,
     user_id: user_id,
     qns_id: qns_id,
-    up_votes: 0,
-    down_votes: 0,
+    up_votes: [],
+    down_votes: [],
     created_at: moment(),
   });
 
@@ -155,7 +156,49 @@ const deleteAnswer = async (req, res, next) => {
   res.status(200).json({ message: "Deleted answer." });
 };
 
+const voteAnswer = async (req, res, next) => {
+  const { up_id, down_id } = req.body;
+  const ansId = req.params.aid;
+
+  let ans;
+  try {
+    ans = await Answer.findById(ansId);
+  } catch (err) {
+    const error = new HttpError("Server error, cannot find answer", 500);
+    return next(error);
+  }
+
+  if (up_id) {
+    if (!ans.up_votes.includes(up_id)) {
+      ans.up_votes.push(up_id);
+    } else {
+      ans.up_votes.pull(up_id);
+    }
+  }
+
+  if (down_id) {
+    if (!ans.down_votes.includes(down_id)) {
+      ans.down_votes.push(down_id);
+    } else {
+      ans.down_votes.pull(down_id);
+    }
+  }
+
+  try {
+    await ans.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update answer.",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ ans: ans.toObject({ getters: true }) });
+};
+
 exports.getAnswerByQns = getAnswerByQns;
 exports.postAnswer = postAnswer;
 exports.updateAnswer = updateAnswer;
 exports.deleteAnswer = deleteAnswer;
+exports.voteAnswer = voteAnswer;
