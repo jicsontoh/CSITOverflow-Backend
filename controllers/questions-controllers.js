@@ -77,6 +77,7 @@ const postQuestion = async (req, res, next) => {
     await user.save({ session: sess });
     await sess.commitTransaction();
   } catch (err) {
+    console.log(err);
     const error = new HttpError("Posting Question failed", 500);
     return next(error);
   }
