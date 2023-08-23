@@ -45,17 +45,6 @@ const getSpecificQns = async (req, res, next) => {
 const postQuestion = async (req, res, next) => {
   const { title, tags, question, user_id } = req.body;
 
-  const createdQns = new Question({
-    title: title,
-    body: question,
-    tags: tags,
-    user_id: user_id,
-    created_at: moment(),
-    answers: [],
-    up_votes: [],
-    down_votes: [],
-  });
-
   let user;
   try {
     user = await User.findById(user_id);
@@ -68,6 +57,19 @@ const postQuestion = async (req, res, next) => {
     const error = new HttpError("Posting Question failed, no such user", 404);
     return next(error);
   }
+
+  const createdQns = new Question({
+    title: title,
+    body: question,
+    tags: tags,
+    user_id: user_id,
+    username: user.username,
+    gravatar: user.gravatar,
+    created_at: moment(),
+    answers: [],
+    up_votes: [],
+    down_votes: [],
+  });
 
   try {
     const sess = await mongoose.startSession();
