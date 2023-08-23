@@ -36,6 +36,31 @@ const getSpecificUser = async (req, res, next) => {
   res.status(201).json({ user: user.toObject({ getters: true }) });
 };
 
+const getUserQuestions = async (req, res, next) => {
+  const userId = req.params.uid;
+
+  let userWithQns;
+  try {
+    userWithQns = await User.findById(userId).populate("questions");
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching questions failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!userWithQns) {
+    return next(
+      new HttpError("Could not find questions for the provided user id.", 404)
+    );
+  }
+
+  res.status(201).json({
+    qns: userWithQns.questions.map((qns) => qns.toObject({ getters: true })),
+  });
+};
+
 const login = async (req, res, next) => {
   const { username, password } = req.body;
 
@@ -112,5 +137,6 @@ const signup = async (req, res, next) => {
 
 exports.getUsers = getUsers;
 exports.getSpecificUser = getSpecificUser;
+exports.getUserQuestions = getUserQuestions;
 exports.login = login;
 exports.signup = signup;
