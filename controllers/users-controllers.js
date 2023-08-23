@@ -59,10 +59,34 @@ const login = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  const { username, password, reenterpwd } = req.body;
+  const { username, password, reenterpwd, avatar } = req.body;
 
   if (password !== reenterpwd) {
     const error = new HttpError("Password does not match", 404);
+    return next(error);
+  }
+
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ username: username });
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (existingUser) {
+    const error = new HttpError(
+      "User exists already, please login instead.",
+      422
+    );
+    return next(error);
+  }
+
+  if (avatar === "") {
+    const error = new HttpError("Please select an Avatar", 404);
     return next(error);
   }
 
@@ -70,7 +94,7 @@ const signup = async (req, res, next) => {
     username: username,
     password: password,
     created_at: moment(),
-    gravatar: "avatar_img",
+    gravatar: avatar,
     votes: 0,
     questions: [],
     answers: [],
@@ -79,7 +103,6 @@ const signup = async (req, res, next) => {
   try {
     await createdUser.save();
   } catch (err) {
-    console.log(err);
     const error = new HttpError("Signing up failed", 500);
     return next(error);
   }

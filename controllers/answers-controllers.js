@@ -34,15 +34,6 @@ const getAnswerByQns = async (req, res, next) => {
 const postAnswer = async (req, res, next) => {
   const { answer, user_id, qns_id } = req.body;
 
-  const createdAns = new Answer({
-    body: answer,
-    user_id: user_id,
-    qns_id: qns_id,
-    up_votes: [],
-    down_votes: [],
-    created_at: moment(),
-  });
-
   let user;
   try {
     user = await User.findById(user_id);
@@ -55,6 +46,17 @@ const postAnswer = async (req, res, next) => {
     const error = new HttpError("Posting Answer failed, no such user", 404);
     return next(error);
   }
+
+  const createdAns = new Answer({
+    body: answer,
+    user_id: user_id,
+    username: user.username,
+    gravatar: user.gravatar,
+    qns_id: qns_id,
+    up_votes: [],
+    down_votes: [],
+    created_at: moment(),
+  });
 
   let question;
   try {
@@ -79,6 +81,7 @@ const postAnswer = async (req, res, next) => {
     await question.save({ session: sess });
     await sess.commitTransaction();
   } catch (err) {
+    console.log(err);
     const error = new HttpError("Posting Answer failed", 500);
     return next(error);
   }
