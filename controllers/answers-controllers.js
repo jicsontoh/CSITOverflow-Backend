@@ -108,6 +108,14 @@ const updateAnswer = async (req, res, next) => {
     return next(error);
   }
 
+  if (ans.user_id.id !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not authorized to edit this answer.",
+      401
+    );
+    return next(error);
+  }
+
   ans.body = body;
 
   try {
@@ -136,6 +144,14 @@ const deleteAnswer = async (req, res, next) => {
 
   if (!ans) {
     const error = new HttpError("Could not find answer", 404);
+    return next(error);
+  }
+
+  if (ans.user_id.id !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not authorized to delete this answer.",
+      401
+    );
     return next(error);
   }
 

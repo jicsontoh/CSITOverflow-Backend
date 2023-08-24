@@ -106,6 +106,14 @@ const updateQuestion = async (req, res, next) => {
     return next(error);
   }
 
+  if (qns.user_id.id !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not authorized to edit this question.",
+      401
+    );
+    return next(error);
+  }
+
   qns.title = title;
   qns.body = body;
 
@@ -138,6 +146,14 @@ const deleteQuestion = async (req, res, next) => {
 
   if (!qns) {
     const error = new HttpError("Could not find question", 404);
+    return next(error);
+  }
+
+  if (qns.user_id.id !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not authorized to delete this question.",
+      401
+    );
     return next(error);
   }
 
