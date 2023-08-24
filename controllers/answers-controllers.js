@@ -32,7 +32,9 @@ const getAnswerByQns = async (req, res, next) => {
 };
 
 const postAnswer = async (req, res, next) => {
-  const { answer, user_id, qns_id } = req.body;
+  const { answer, qns_id } = req.body;
+
+  const user_id = req.userData.userId;
 
   let user;
   try {

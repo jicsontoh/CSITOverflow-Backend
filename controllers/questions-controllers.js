@@ -43,7 +43,9 @@ const getSpecificQns = async (req, res, next) => {
 };
 
 const postQuestion = async (req, res, next) => {
-  const { title, tags, question, user_id } = req.body;
+  const { title, tags, question } = req.body;
+
+  const user_id = req.userData.userId;
 
   let user;
   try {
