@@ -1,10 +1,13 @@
 const express = require("express");
 
 const ansControllers = require("../controllers/answers-controllers");
+const checkAuth = require("../middleware/check-auth");
 
 const router = express.Router();
 
 router.get("/:qid", ansControllers.getAnswerByQns);
+
+router.use(checkAuth);
 
 router.post("/new", ansControllers.postAnswer);
 
