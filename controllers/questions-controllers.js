@@ -42,6 +42,27 @@ const getSpecificQns = async (req, res, next) => {
   res.json({ qns: qns.toObject({ getters: true }) });
 };
 
+const getSearchQuestion = async (req, res, next) => {
+  const query = req.params.query;
+
+  let questions;
+  try {
+    questions = await Question.find({
+      title: { $regex: "^" + query, $options: "i" },
+    });
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching questions failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  res.json({
+    questions: questions.map((qns) => qns.toObject({ getters: true })),
+  });
+};
+
 const postQuestion = async (req, res, next) => {
   const { title, tags, question } = req.body;
 
@@ -220,6 +241,7 @@ const voteQuestion = async (req, res, next) => {
 
 exports.getQuestions = getQuestions;
 exports.getSpecificQns = getSpecificQns;
+exports.getSearchQuestion = getSearchQuestion;
 exports.postQuestion = postQuestion;
 exports.updateQuestion = updateQuestion;
 exports.deleteQuestion = deleteQuestion;

@@ -9,6 +9,8 @@ router.get("/", qnsController.getQuestions);
 
 router.get("/:qid", qnsController.getSpecificQns);
 
+router.get("/search/:query", qnsController.getSearchQuestion);
+
 router.use(checkAuth);
 
 router.post("/new", qnsController.postQuestion);
