@@ -7,9 +7,9 @@ const router = express.Router();
 
 router.get("/", qnsController.getQuestions);
 
-router.get("/:qid", qnsController.getSpecificQns);
+router.get("/search/:query?", qnsController.getSearchQuestion);
 
-router.get("/search/:query", qnsController.getSearchQuestion);
+router.get("/:qid", qnsController.getSpecificQns);
 
 router.use(checkAuth);
 
