@@ -1,4 +1,4 @@
-FROM node:10.16-alpine
+FROM node:20.5-alpine
 
 # Create App Directory
 RUN mkdir -p /usr/src/app
