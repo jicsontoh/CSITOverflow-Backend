@@ -1,6 +1,7 @@
 # CSITOverflow-Backend
 
-Backend node.js, express.js and mongoDB for [CSITOverflow App](https://github.com/jicsontoh/CSITOverflow-Frontend)
+This is the backend code repository for my [CSITOverflow App](https://github.com/jicsontoh/CSITOverflow-Frontend).
+This is built using node.js, express.js and mongoDB.
 
 ## How to Install
 
@@ -24,3 +25,11 @@ $ npm i
 ```
 $ npm start
 ```
+
+If you wish to Dockerise the application, you can apply the following command to create an image
+
+```
+$ docker build -t csit-overflow-backend .
+```
+
+Do remember to set the env variables
