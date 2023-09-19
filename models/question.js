@@ -14,5 +14,6 @@ const questionSchema = new Schema({
   down_votes: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   created_at: { type: String },
 });
+questionSchema.index({ title: "text", body: "text" });
 
 module.exports = mongoose.model("Question", questionSchema);

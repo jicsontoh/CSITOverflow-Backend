@@ -48,7 +48,7 @@ const getSearchQuestion = async (req, res, next) => {
   let questions;
   try {
     questions = await Question.find({
-      title: { $regex: "^" + query, $options: "i" },
+      $text: { $search: query, $caseSensitive: false },
     });
   } catch (err) {
     const error = new HttpError(
