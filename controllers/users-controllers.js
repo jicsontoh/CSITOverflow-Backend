@@ -70,7 +70,7 @@ const login = async (req, res, next) => {
   let user;
   try {
     user = await User.findOne({
-      username: { $regex: username, $options: "i" },
+      username: { $regex: "^" + username + "$", $options: "im" },
     });
   } catch (err) {
     const error = new HttpError("Server error, cannot find user", 500);
@@ -135,7 +135,7 @@ const signup = async (req, res, next) => {
   let existingUser;
   try {
     existingUser = await User.findOne({
-      username: { $regex: username, $options: "i" },
+      username: { $regex: "^" + username + "$", $options: "im" },
     });
   } catch (err) {
     const error = new HttpError(
